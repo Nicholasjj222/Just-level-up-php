@@ -1,0 +1,66 @@
+<?php
+header("Content-Type: application/json");
+
+// Database connection
+$host = "localhost";
+$port = "5432";
+$dbname = "myapp";
+$user = "postgres";
+$password = "password";
+
+try {
+    $dsn = "pgsql:host=$host;port=$port;dbname=$dbname;";
+    $pdo = new PDO($dsn, $user, $password, [
+        PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION
+    ]);
+} catch (PDOException $e) {
+    echo json_encode(["error" => "Database connection failed"]);
+    exit;
+}
+
+// Simple router
+$requestMethod = $_SERVER["REQUEST_METHOD"];
+$path = $_GET["path"] ?? "";
+
+// Routes
+if ($path === "users" && $requestMethod === "GET") {
+    getUsers($pdo);
+} elseif ($path === "users" && $requestMethod === "POST") {
+    createUser($pdo);
+} else {
+    echo json_encode(["message" => "Route not found"]);
+}
+
+// Functions
+
+function getUsers($pdo) {
+    $stmt = $pdo->query("SELECT id, name, email FROM users ORDER BY id DESC");
+    $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    echo json_encode($users);
+}
+
+function createUser($pdo) {
+    $data = json_decode(file_get_contents("php://input"), true);
+
+    if (!isset($data["name"], $data["email"])) {
+        echo json_encode(["error" => "Invalid input"]);
+        return;
+    }
+
+    $stmt = $pdo->prepare(
+        "INSERT INTO users (name, email) VALUES (:name, :email) RETURNING id"
+    );
+
+    $stmt->execute([
+        ":name" => $data["name"],
+        ":email" => $data["email"]
+    ]);
+
+    $id = $stmt->fetchColumn();
+
+    echo json_encode([
+        "message" => "User created",
+        "id" => $id
+    ]);
+}
