@@ -1,0 +1,63 @@
+<?php
+
+namespace App\Core;
+
+use PDO;
+
+class Queue
+{
+    private PDO $db;
+
+    public function __construct()
+    {
+        $this->db = require __DIR__ . '/../../config/database.php';
+    }
+
+    public function push($type, $payload)
+    {
+        $stmt = $this->db->prepare(
+            "INSERT INTO jobs (type, payload) VALUES (?, ?)"
+        );
+
+        return $stmt->execute([
+            $type,
+            json_encode($payload)
+        ]);
+    }
+
+    public function pull()
+    {
+        $stmt = $this->db->query(
+            "SELECT * FROM jobs WHERE status = 'pending' ORDER BY id ASC LIMIT 1"
+        );
+
+        $job = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if ($job) {
+            $this->markProcessing($job['id']);
+        }
+
+        return $job;
+    }
+
+    public function markProcessing($id)
+    {
+        $this->db->prepare(
+            "UPDATE jobs SET status = 'processing' WHERE id = ?"
+        )->execute([$id]);
+    }
+
+    public function markDone($id)
+    {
+        $this->db->prepare(
+            "UPDATE jobs SET status = 'done' WHERE id = ?"
+        )->execute([$id]);
+    }
+
+    public function fail($id)
+    {
+        $this->db->prepare(
+            "UPDATE jobs SET status = 'failed', attempts = attempts + 1 WHERE id = ?"
+        )->execute([$id]);
+    }
+}
