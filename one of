@@ -1,0 +1,42 @@
+<?php
+
+namespace App\Core;
+
+class App
+{
+    public Container $container;
+    public EventBus $events;
+    public Middleware $middleware;
+
+    public function __construct()
+    {
+        $this->container = new Container();
+        $this->events = new EventBus();
+        $this->middleware = new Middleware();
+    }
+
+    public function run()
+    {
+        $request = $_GET;
+
+        return $this->middleware->handle($request, function ($req) {
+            return $this->handleRequest($req);
+        });
+    }
+
+    private function handleRequest($req)
+    {
+        if (($req['action'] ?? null) === 'register') {
+
+            $email = $req['email'] ?? 'unknown@mail.com';
+
+            $this->events->dispatch(
+                new \App\Events\UserRegistered($email)
+            );
+
+            return "User registered: $email";
+        }
+
+        return "Welcome to VibeCore";
+    }
+}
