@@ -1,0 +1,9 @@
+<php
+
+require_once __DIR__ . '/../vendor/autoload.php';
+
+use App\Http\Kernel;
+
+$app = Kernel::boot();
+
+echo $app->run();
