@@ -1,0 +1,19 @@
+vibecore/
+│── app/
+│   ├── Core/
+│   │   ├── App.php
+│   │   ├── Container.php
+│   │   ├── EventBus.php
+│   │   └── Middleware.php
+│   │
+│   ├── Events/
+│   │   └── UserRegistered.php
+│   │
+│   ├── Listeners/
+│   │   └── SendWelcomeEmail.php
+│   │
+│   ├── Http/
+│   │   └── Kernel.php
+│
+│── public/
+│   └── index.php
