@@ -1,1 +1,1 @@
-echo "<h1 style='color: green;'>User registered</h1>";
+echo "<h1 style style 555555555='color: green;'>User registered</h1>";
