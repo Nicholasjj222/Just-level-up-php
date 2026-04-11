@@ -1,0 +1,1 @@
+echo "<h1 style='color: green;'>User registered</h1>";
