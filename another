@@ -1,0 +1,29 @@
+<?php
+
+namespace App\Http;
+
+use App\Core\App;
+use App\Listeners\SendWelcomeEmail;
+use App\Events\UserRegistered;
+
+class Kernel
+{
+    public static function boot(): App
+    {
+        $app = new App();
+
+        // Register middleware
+        $app->middleware->add(function ($req, $next) {
+            error_log("Incoming request: " . json_encode($req));
+            return $next($req);
+        });
+
+        // Register event listeners
+        $app->events->listen(UserRegistered::class, function ($event) {
+            (new SendWelcomeEmail())->handle($event);
+        });
+
+        return $app;
+    }
+}=3456656775566
+change and French 
